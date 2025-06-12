@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Card } from '../ui/Card';
@@ -16,8 +16,26 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
 
   const { signIn, signUp } = useAuth();
+
+  // Handle cooldown timer
+  useEffect(() => {
+    if (cooldownSeconds > 0) {
+      const interval = setInterval(() => {
+        setCooldownSeconds(prev => prev - 1);
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [cooldownSeconds]);
+
+  const parseCooldownFromError = (errorMessage: string): number => {
+    // Extract seconds from messages like "you can only request this after 51 seconds"
+    const match = errorMessage.match(/after (\d+) seconds/);
+    return match ? parseInt(match[1], 10) : 60; // Default to 60 seconds if parsing fails
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +51,14 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
       }
 
       if (result.error) {
-        setError(result.error.message);
+        const errorMessage = result.error.message;
+        setError(errorMessage);
+
+        // Check if it's a rate limit error and set cooldown
+        if (errorMessage.includes('over_email_send_rate_limit')) {
+          const cooldownTime = parseCooldownFromError(errorMessage);
+          setCooldownSeconds(cooldownTime);
+        }
       } else {
         onSuccess();
       }
@@ -42,6 +67,15 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const isDisabled = loading || cooldownSeconds > 0;
+
+  const getErrorMessage = () => {
+    if (cooldownSeconds > 0) {
+      return `Please wait ${cooldownSeconds} seconds before trying again due to rate limiting.`;
+    }
+    return error;
   };
 
   return (
@@ -86,9 +120,13 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
             required
           />
 
-          {error && (
-            <div className="p-3 bg-error-50 border border-error-200 rounded-lg text-error-600 text-sm animate-fade-in">
-              {error}
+          {(error || cooldownSeconds > 0) && (
+            <div className={`p-3 border rounded-lg text-sm animate-fade-in ${
+              cooldownSeconds > 0 
+                ? 'bg-yellow-50 border-yellow-200 text-yellow-700'
+                : 'bg-error-50 border-error-200 text-error-600'
+            }`}>
+              {getErrorMessage()}
             </div>
           )}
 
@@ -96,9 +134,14 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
             type="submit"
             className="w-full"
             loading={loading}
-            disabled={loading}
+            disabled={isDisabled}
           >
-            {isSignUp ? 'Create Account' : 'Sign In'}
+            {cooldownSeconds > 0 
+              ? `Wait ${cooldownSeconds}s` 
+              : isSignUp 
+                ? 'Create Account' 
+                : 'Sign In'
+            }
           </Button>
         </form>
 
@@ -107,6 +150,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
             type="button"
             onClick={() => setIsSignUp(!isSignUp)}
             className="text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200"
+            disabled={isDisabled}
           >
             {isSignUp 
               ? 'Already have an account? Sign in' 
