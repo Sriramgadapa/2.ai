@@ -9,11 +9,8 @@ import {
   History, 
   Heart,
   Settings,
-  LogOut,
-  Brain,
-  Zap
+  Brain
 } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
 
 interface SidebarProps {
   activeTab: string;
@@ -36,12 +33,6 @@ const bottomItems = [
 ];
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
-  const { signOut, user } = useAuth();
-
-  const handleSignOut = async () => {
-    await signOut();
-  };
-
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen">
       {/* Logo */}
@@ -115,29 +106,14 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
         </div>
       </div>
 
-      {/* User Profile */}
+      {/* Welcome Message */}
       <div className="p-4 border-t border-gray-200">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-medium">
-                {user?.email?.charAt(0).toUpperCase()}
-              </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {user?.user_metadata?.full_name || 'User'}
-              </p>
-              <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-            </div>
+        <div className="text-center">
+          <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-full flex items-center justify-center mx-auto mb-2">
+            <Sparkles className="w-4 h-4 text-white" />
           </div>
-          <button
-            onClick={handleSignOut}
-            className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-            title="Sign out"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+          <p className="text-sm font-medium text-gray-900">Welcome to ContentAI</p>
+          <p className="text-xs text-gray-500">Start creating amazing content</p>
         </div>
       </div>
     </div>

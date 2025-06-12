@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { useAuth } from './hooks/useAuth';
-import { AuthForm } from './components/auth/AuthForm';
 import { Sidebar } from './components/layout/Sidebar';
 import { GenerateContent } from './components/tools/GenerateContent';
 import { AdvancedGenerateContent } from './components/tools/AdvancedGenerateContent';
@@ -12,20 +10,7 @@ import { Projects } from './components/workspace/Projects';
 import { History } from './components/workspace/History';
 
 function App() {
-  const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('advanced-generate');
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <AuthForm onSuccess={() => {}} />;
-  }
 
   const renderContent = () => {
     switch (activeTab) {
