@@ -10,7 +10,6 @@ interface AuthFormProps {
 }
 
 export function AuthForm({ onSuccess }: AuthFormProps) {
-  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -18,7 +17,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
   const [error, setError] = useState('');
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
 
-  const { signIn, signUp } = useAuth();
+  const { signUp } = useAuth();
 
   // Handle cooldown timer
   useEffect(() => {
@@ -43,12 +42,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
     setError('');
 
     try {
-      let result;
-      if (isSignUp) {
-        result = await signUp(email, password, fullName);
-      } else {
-        result = await signIn(email, password);
-      }
+      const result = await signUp(email, password, fullName);
 
       if (result.error) {
         const errorMessage = result.error.message;
@@ -86,21 +80,17 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
             <Sparkles className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">ContentAI</h1>
-          <p className="text-gray-600">
-            {isSignUp ? 'Create your account' : 'Welcome back'}
-          </p>
+          <p className="text-gray-600">Create your account to get started</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {isSignUp && (
-            <Input
-              label="Full Name"
-              placeholder="Enter your full name"
-              value={fullName}
-              onChange={setFullName}
-              required
-            />
-          )}
+          <Input
+            label="Full Name"
+            placeholder="Enter your full name"
+            value={fullName}
+            onChange={setFullName}
+            required
+          />
           
           <Input
             label="Email"
@@ -138,26 +128,10 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
           >
             {cooldownSeconds > 0 
               ? `Wait ${cooldownSeconds}s` 
-              : isSignUp 
-                ? 'Create Account' 
-                : 'Sign In'
+              : 'Create Account'
             }
           </Button>
         </form>
-
-        <div className="mt-6 text-center">
-          <button
-            type="button"
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200"
-            disabled={isDisabled}
-          >
-            {isSignUp 
-              ? 'Already have an account? Sign in' 
-              : "Don't have an account? Sign up"
-            }
-          </button>
-        </div>
       </Card>
     </div>
   );
