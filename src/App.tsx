@@ -1,29 +1,17 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Sidebar } from './components/layout/Sidebar';
-import { GenerateContent } from './components/tools/GenerateContent';
-import { AdvancedGenerateContent } from './components/tools/AdvancedGenerateContent';
-import { RewriteContent } from './components/tools/RewriteContent';
-import { SummarizeContent } from './components/tools/SummarizeContent';
-import { TranslateContent } from './components/tools/TranslateContent';
+import { UnifiedAITool } from './components/tools/UnifiedAITool';
 import { Projects } from './components/workspace/Projects';
 import { History } from './components/workspace/History';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('advanced-generate');
+  const [activeTab, setActiveTab] = useState('ai-studio');
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'advanced-generate':
-        return <AdvancedGenerateContent />;
-      case 'generate':
-        return <GenerateContent />;
-      case 'rewrite':
-        return <RewriteContent />;
-      case 'summarize':
-        return <SummarizeContent />;
-      case 'translate':
-        return <TranslateContent />;
+      case 'ai-studio':
+        return <UnifiedAITool />;
       case 'projects':
         return <Projects />;
       case 'history':
@@ -40,7 +28,7 @@ function App() {
           </div>
         );
       default:
-        return <AdvancedGenerateContent />;
+        return <UnifiedAITool />;
     }
   };
 

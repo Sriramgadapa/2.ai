@@ -1,10 +1,6 @@
 import React from 'react';
 import { 
   Sparkles, 
-  PenTool, 
-  RefreshCw, 
-  FileText, 
-  Languages, 
   FolderOpen, 
   History, 
   Heart,
@@ -18,11 +14,7 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { id: 'advanced-generate', label: 'AI Studio', icon: Brain, badge: 'NEW' },
-  { id: 'generate', label: 'Generate', icon: PenTool },
-  { id: 'rewrite', label: 'Rewrite', icon: RefreshCw },
-  { id: 'summarize', label: 'Summarize', icon: FileText },
-  { id: 'translate', label: 'Translate', icon: Languages },
+  { id: 'ai-studio', label: 'AI Studio', icon: Brain, badge: 'ALL-IN-ONE' },
 ];
 
 const bottomItems = [
@@ -43,7 +35,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           </div>
           <div>
             <h1 className="text-xl font-bold text-gray-900">ContentAI</h1>
-            <p className="text-sm text-gray-500">Next-Gen AI Platform</p>
+            <p className="text-sm text-gray-500">All-in-One AI Platform</p>
           </div>
         </div>
       </div>
@@ -112,8 +104,8 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-full flex items-center justify-center mx-auto mb-2">
             <Sparkles className="w-4 h-4 text-white" />
           </div>
-          <p className="text-sm font-medium text-gray-900">Welcome to ContentAI</p>
-          <p className="text-xs text-gray-500">Start creating amazing content</p>
+          <p className="text-sm font-medium text-gray-900">ContentAI Studio</p>
+          <p className="text-xs text-gray-500">All AI tools in one place</p>
         </div>
       </div>
     </div>
