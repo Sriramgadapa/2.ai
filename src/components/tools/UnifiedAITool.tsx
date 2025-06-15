@@ -17,72 +17,31 @@ import {
   RefreshCw,
   FileText,
   Languages,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Sparkles,
+  Target,
+  Clock
 } from 'lucide-react';
 import { aiEngine } from '../../lib/ai/transformers';
 import { TransformerConfig, AIResponse } from '../../types/ai';
 
-type ToolType = 'generate' | 'rewrite' | 'summarize' | 'translate';
-
-interface ToolOption {
-  id: ToolType;
-  name: string;
-  description: string;
-  icon: React.ComponentType<any>;
-  color: string;
-}
-
-const toolOptions: ToolOption[] = [
-  {
-    id: 'generate',
-    name: 'Generate Content',
-    description: 'Create new content from scratch',
-    icon: PenTool,
-    color: 'from-blue-500 to-blue-600'
-  },
-  {
-    id: 'rewrite',
-    name: 'Rewrite Content',
-    description: 'Improve and refine existing content',
-    icon: RefreshCw,
-    color: 'from-green-500 to-green-600'
-  },
-  {
-    id: 'summarize',
-    name: 'Summarize Content',
-    description: 'Create concise summaries',
-    icon: FileText,
-    color: 'from-purple-500 to-purple-600'
-  },
-  {
-    id: 'translate',
-    name: 'Translate Content',
-    description: 'Translate between languages',
-    icon: Languages,
-    color: 'from-orange-500 to-orange-600'
-  }
-];
+type ToolType = 'unified';
 
 export function UnifiedAITool() {
-  const [selectedTool, setSelectedTool] = useState<ToolType>('generate');
+  const [selectedTool, setSelectedTool] = useState<ToolType>('unified');
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<AIResponse | null>(null);
   
-  // Generate-specific settings
+  // Unified tool settings
+  const [taskType, setTaskType] = useState('generate');
   const [contentType, setContentType] = useState('blog-post');
   const [tone, setTone] = useState('professional');
   const [length, setLength] = useState('medium');
-  
-  // Rewrite-specific settings
   const [rewriteStyle, setRewriteStyle] = useState('improve');
-  
-  // Summarize-specific settings
   const [summaryType, setSummaryType] = useState('bullet-points');
   const [summaryLength, setSummaryLength] = useState('medium');
-  
-  // Translate-specific settings
   const [fromLang, setFromLang] = useState('en');
   const [toLang, setToLang] = useState('es');
   
@@ -93,6 +52,13 @@ export function UnifiedAITool() {
     enhancers: []
   });
 
+  const taskTypes = [
+    { value: 'generate', label: 'Generate Content', icon: PenTool, description: 'Create new content from scratch' },
+    { value: 'rewrite', label: 'Rewrite Content', icon: RefreshCw, description: 'Improve and refine existing content' },
+    { value: 'summarize', label: 'Summarize Content', icon: FileText, description: 'Create concise summaries' },
+    { value: 'translate', label: 'Translate Content', icon: Languages, description: 'Translate between languages' }
+  ];
+
   const contentTypes = [
     { value: 'blog-post', label: 'Blog Post' },
     { value: 'social-media', label: 'Social Media' },
@@ -101,6 +67,9 @@ export function UnifiedAITool() {
     { value: 'article', label: 'Article' },
     { value: 'marketing-copy', label: 'Marketing Copy' },
     { value: 'technical-doc', label: 'Technical Documentation' },
+    { value: 'press-release', label: 'Press Release' },
+    { value: 'newsletter', label: 'Newsletter' },
+    { value: 'landing-page', label: 'Landing Page' }
   ];
 
   const tones = [
@@ -111,32 +80,38 @@ export function UnifiedAITool() {
     { value: 'informative', label: 'Informative' },
     { value: 'creative', label: 'Creative' },
     { value: 'formal', label: 'Formal' },
+    { value: 'conversational', label: 'Conversational' },
+    { value: 'authoritative', label: 'Authoritative' },
+    { value: 'empathetic', label: 'Empathetic' }
   ];
 
   const lengths = [
-    { value: 'short', label: 'Short' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'long', label: 'Long' },
-    { value: 'very-long', label: 'Very Long' },
+    { value: 'short', label: 'Short (100-300 words)' },
+    { value: 'medium', label: 'Medium (300-800 words)' },
+    { value: 'long', label: 'Long (800-1500 words)' },
+    { value: 'very-long', label: 'Very Long (1500+ words)' },
   ];
 
   const rewriteStyles = [
-    { value: 'improve', label: 'Improve Writing' },
+    { value: 'improve', label: 'Improve Writing Quality' },
     { value: 'simplify', label: 'Simplify Language' },
     { value: 'formal', label: 'Make More Formal' },
     { value: 'casual', label: 'Make More Casual' },
-    { value: 'expand', label: 'Expand Ideas' },
-    { value: 'shorten', label: 'Make Shorter' },
+    { value: 'expand', label: 'Expand with Details' },
+    { value: 'shorten', label: 'Make More Concise' },
     { value: 'professional', label: 'Professional Tone' },
     { value: 'creative', label: 'Creative Enhancement' },
+    { value: 'persuasive', label: 'More Persuasive' },
+    { value: 'engaging', label: 'More Engaging' }
   ];
 
   const summaryTypes = [
     { value: 'bullet-points', label: 'Bullet Points' },
-    { value: 'paragraph', label: 'Paragraph' },
+    { value: 'paragraph', label: 'Paragraph Summary' },
     { value: 'key-takeaways', label: 'Key Takeaways' },
     { value: 'executive-summary', label: 'Executive Summary' },
     { value: 'outline', label: 'Outline Format' },
+    { value: 'abstract', label: 'Abstract Style' }
   ];
 
   const languages = [
@@ -155,6 +130,11 @@ export function UnifiedAITool() {
     { code: 'nl', name: 'Dutch' },
     { code: 'sv', name: 'Swedish' },
     { code: 'no', name: 'Norwegian' },
+    { code: 'da', name: 'Danish' },
+    { code: 'fi', name: 'Finnish' },
+    { code: 'pl', name: 'Polish' },
+    { code: 'tr', name: 'Turkish' },
+    { code: 'th', name: 'Thai' }
   ];
 
   const handleProcess = async () => {
@@ -165,7 +145,7 @@ export function UnifiedAITool() {
       let prompt = '';
       let contextType = '';
 
-      switch (selectedTool) {
+      switch (taskType) {
         case 'generate':
           prompt = `Create a ${contentTypes.find(t => t.value === contentType)?.label} with a ${tone} tone and ${length} length about: ${input}`;
           contextType = 'content-generation';
@@ -190,11 +170,11 @@ export function UnifiedAITool() {
         prompt,
         config: {
           ...config,
-          enhancers: [...(config.enhancers || []), `${selectedTool}-optimizer`]
+          enhancers: [...(config.enhancers || []), `${taskType}-optimizer`]
         },
         context: {
           contentType: contextType,
-          toolType: selectedTool,
+          toolType: taskType,
           userPreferences: {
             contentType,
             tone,
@@ -212,7 +192,7 @@ export function UnifiedAITool() {
       setResponse(aiResponse);
     } catch (error) {
       console.error('Processing failed:', error);
-      setOutput('Error: Failed to process content. Please try again.');
+      setOutput('Error: Failed to process content. Please try again with different settings or check your input.');
     } finally {
       setLoading(false);
     }
@@ -228,7 +208,7 @@ export function UnifiedAITool() {
   };
 
   const getInputLabel = () => {
-    switch (selectedTool) {
+    switch (taskType) {
       case 'generate':
         return 'Describe what you want to create';
       case 'rewrite':
@@ -243,22 +223,22 @@ export function UnifiedAITool() {
   };
 
   const getInputPlaceholder = () => {
-    switch (selectedTool) {
+    switch (taskType) {
       case 'generate':
-        return 'Describe the content you want to generate...';
+        return 'Describe the content you want to generate... (e.g., "Write about sustainable living practices for busy professionals")';
       case 'rewrite':
-        return 'Paste your content here to rewrite it...';
+        return 'Paste your content here to rewrite it... (e.g., existing blog post, email, or article)';
       case 'summarize':
-        return 'Paste your long-form content here to summarize...';
+        return 'Paste your long-form content here to summarize... (e.g., research paper, article, or report)';
       case 'translate':
-        return 'Enter text you want to translate...';
+        return 'Enter text you want to translate... (e.g., "Welcome to our platform")';
       default:
         return 'Enter your text here...';
     }
   };
 
-  const renderToolSpecificSettings = () => {
-    switch (selectedTool) {
+  const renderTaskSpecificSettings = () => {
+    switch (taskType) {
       case 'generate':
         return (
           <div className="space-y-4">
@@ -391,7 +371,7 @@ export function UnifiedAITool() {
     }
   };
 
-  const selectedToolOption = toolOptions.find(tool => tool.id === selectedTool);
+  const selectedTaskType = taskTypes.find(task => task.value === taskType);
 
   return (
     <div className="space-y-6">
@@ -401,37 +381,45 @@ export function UnifiedAITool() {
             <Brain className="w-8 h-8 text-primary-600" />
             <span>AI Content Studio</span>
           </h1>
-          <p className="text-gray-600">All-in-one AI-powered content creation and enhancement platform</p>
+          <p className="text-gray-600">Unified AI-powered content creation and enhancement platform</p>
         </div>
         <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary-50 to-secondary-50 rounded-lg border border-primary-200">
-          <Zap className="w-4 h-4 text-primary-600" />
+          <Sparkles className="w-4 h-4 text-primary-600" />
           <span className="text-sm font-medium text-primary-700">AI Enhanced</span>
         </div>
       </div>
 
-      {/* Tool Selection */}
+      {/* Task Type Selection */}
       <Card>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Select AI Tool</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+          <Target className="w-5 h-5 text-primary-600" />
+          <span>Select AI Task</span>
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {toolOptions.map((tool) => {
-            const Icon = tool.icon;
+          {taskTypes.map((task) => {
+            const Icon = task.icon;
             return (
               <button
-                key={tool.id}
-                onClick={() => setSelectedTool(tool.id)}
+                key={task.value}
+                onClick={() => setTaskType(task.value)}
                 className={`
                   p-4 rounded-lg border-2 transition-all duration-200 text-left
-                  ${selectedTool === tool.id
+                  ${taskType === task.value
                     ? 'border-primary-500 bg-primary-50 ring-2 ring-primary-200'
                     : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                   }
                 `}
               >
-                <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${tool.color} flex items-center justify-center mb-3`}>
+                <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${
+                  task.value === 'generate' ? 'from-blue-500 to-blue-600' :
+                  task.value === 'rewrite' ? 'from-green-500 to-green-600' :
+                  task.value === 'summarize' ? 'from-purple-500 to-purple-600' :
+                  'from-orange-500 to-orange-600'
+                } flex items-center justify-center mb-3`}>
                   <Icon className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-1">{tool.name}</h3>
-                <p className="text-sm text-gray-600">{tool.description}</p>
+                <h3 className="font-semibold text-gray-900 mb-1">{task.label}</h3>
+                <p className="text-sm text-gray-600">{task.description}</p>
               </button>
             );
           })}
@@ -448,13 +436,13 @@ export function UnifiedAITool() {
             />
           </Card>
 
-          {/* Tool-specific settings */}
+          {/* Task-specific settings */}
           <Card>
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-              {selectedToolOption && <selectedToolOption.icon className="w-5 h-5 text-primary-600" />}
-              <span>{selectedToolOption?.name} Settings</span>
+              {selectedTaskType && <selectedTaskType.icon className="w-5 h-5 text-primary-600" />}
+              <span>{selectedTaskType?.label} Settings</span>
             </h3>
-            {renderToolSpecificSettings()}
+            {renderTaskSpecificSettings()}
           </Card>
 
           <Card>
@@ -476,8 +464,8 @@ export function UnifiedAITool() {
         <div className="xl:col-span-2 space-y-6">
           <Card>
             <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-              {selectedToolOption && <selectedToolOption.icon className="w-5 h-5 text-primary-600" />}
-              <span>{selectedToolOption?.name}</span>
+              {selectedTaskType && <selectedTaskType.icon className="w-5 h-5 text-primary-600" />}
+              <span>{selectedTaskType?.label}</span>
             </h2>
             
             <div className="space-y-4">
@@ -493,11 +481,23 @@ export function UnifiedAITool() {
               <Button
                 onClick={handleProcess}
                 loading={loading}
-                disabled={!input.trim() || loading || (selectedTool === 'translate' && fromLang === toLang)}
-                icon={selectedToolOption?.icon}
-                className={`w-full bg-gradient-to-r ${selectedToolOption?.color} hover:opacity-90`}
+                disabled={!input.trim() || loading || (taskType === 'translate' && fromLang === toLang)}
+                icon={selectedTaskType?.icon}
+                className={`w-full bg-gradient-to-r ${
+                  taskType === 'generate' ? 'from-blue-500 to-blue-600' :
+                  taskType === 'rewrite' ? 'from-green-500 to-green-600' :
+                  taskType === 'summarize' ? 'from-purple-500 to-purple-600' :
+                  'from-orange-500 to-orange-600'
+                } hover:opacity-90`}
               >
-                {loading ? 'Processing...' : `${selectedToolOption?.name}`}
+                {loading ? (
+                  <span className="flex items-center space-x-2">
+                    <Clock className="w-4 h-4 animate-spin" />
+                    <span>Processing...</span>
+                  </span>
+                ) : (
+                  `${selectedTaskType?.label}`
+                )}
               </Button>
             </div>
           </Card>
@@ -540,8 +540,8 @@ export function UnifiedAITool() {
                     <div className="font-semibold text-blue-600">{response.processingTime}ms</div>
                   </div>
                   <div>
-                    <span className="text-gray-600">Tool:</span>
-                    <div className="font-semibold text-purple-600 capitalize">{selectedTool}</div>
+                    <span className="text-gray-600">Task:</span>
+                    <div className="font-semibold text-purple-600 capitalize">{taskType}</div>
                   </div>
                 </div>
               </div>
@@ -557,7 +557,10 @@ export function UnifiedAITool() {
                 
                 {response?.suggestions && response.suggestions.length > 0 && (
                   <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <h4 className="text-sm font-semibold text-blue-900 mb-2">AI Suggestions:</h4>
+                    <h4 className="text-sm font-semibold text-blue-900 mb-2 flex items-center space-x-2">
+                      <Zap className="w-4 h-4" />
+                      <span>AI Suggestions:</span>
+                    </h4>
                     <ul className="text-sm text-blue-800 space-y-1">
                       {response.suggestions.map((suggestion, index) => (
                         <li key={index} className="flex items-start space-x-2">
@@ -571,11 +574,16 @@ export function UnifiedAITool() {
               </div>
             ) : (
               <div className="text-center py-16 text-gray-500">
-                <div className={`w-16 h-16 mx-auto mb-4 bg-gradient-to-br ${selectedToolOption?.color || 'from-primary-100 to-secondary-100'} rounded-full flex items-center justify-center`}>
-                  {selectedToolOption && <selectedToolOption.icon className="w-8 h-8 text-white" />}
+                <div className={`w-16 h-16 mx-auto mb-4 bg-gradient-to-br ${
+                  taskType === 'generate' ? 'from-blue-100 to-blue-200' :
+                  taskType === 'rewrite' ? 'from-green-100 to-green-200' :
+                  taskType === 'summarize' ? 'from-purple-100 to-purple-200' :
+                  'from-orange-100 to-orange-200'
+                } rounded-full flex items-center justify-center`}>
+                  {selectedTaskType && <selectedTaskType.icon className="w-8 h-8 text-white" />}
                 </div>
                 <p className="text-lg font-medium mb-2">AI Ready</p>
-                <p>Your {selectedToolOption?.name.toLowerCase()} output will appear here</p>
+                <p>Your {selectedTaskType?.label.toLowerCase()} output will appear here</p>
               </div>
             )}
           </Card>
