@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/Button';
 import { Textarea } from '../ui/Textarea';
 import { Card } from '../ui/Card';
@@ -6,6 +6,7 @@ import { Input } from '../ui/Input';
 import { ModelSelector } from '../ai/ModelSelector';
 import { EnhancerSelector } from '../ai/EnhancerSelector';
 import { AdvancedSettings } from '../ai/AdvancedSettings';
+import { ApiKeySetup } from '../ai/ApiKeySetup';
 import { 
   Brain, 
   Copy, 
@@ -20,9 +21,12 @@ import {
   ArrowLeftRight,
   Sparkles,
   Target,
-  Clock
+  Clock,
+  Key,
+  AlertTriangle
 } from 'lucide-react';
 import { aiEngine } from '../../lib/ai/transformers';
+import { openaiClient } from '../../lib/ai/openai-client';
 import { TransformerConfig, AIResponse } from '../../types/ai';
 
 type ToolType = 'unified';
@@ -33,6 +37,8 @@ export function UnifiedAITool() {
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<AIResponse | null>(null);
+  const [showApiKeySetup, setShowApiKeySetup] = useState(false);
+  const [isApiConfigured, setIsApiConfigured] = useState(false);
   
   // Unified tool settings
   const [taskType, setTaskType] = useState('generate');
@@ -51,6 +57,17 @@ export function UnifiedAITool() {
     maxTokens: 2000,
     enhancers: []
   });
+
+  // Check if API is configured on component mount
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem('openai_api_key');
+    if (savedApiKey) {
+      aiEngine.setApiKey(savedApiKey);
+      setIsApiConfigured(true);
+    } else {
+      setIsApiConfigured(openaiClient.isConfigured());
+    }
+  }, []);
 
   const taskTypes = [
     { value: 'generate', label: 'Generate Content', icon: PenTool, description: 'Create new content from scratch' },
@@ -192,7 +209,7 @@ export function UnifiedAITool() {
       setResponse(aiResponse);
     } catch (error) {
       console.error('Processing failed:', error);
-      setOutput('Error: Failed to process content. Please try again with different settings or check your input.');
+      setOutput('Error: Failed to process content. Please check your API configuration and try again.');
     } finally {
       setLoading(false);
     }
@@ -205,6 +222,11 @@ export function UnifiedAITool() {
   const handleSwapLanguages = () => {
     setFromLang(toLang);
     setToLang(fromLang);
+  };
+
+  const handleApiKeySet = () => {
+    setShowApiKeySetup(false);
+    setIsApiConfigured(true);
   };
 
   const getInputLabel = () => {
@@ -375,6 +397,8 @@ export function UnifiedAITool() {
 
   return (
     <div className="space-y-6">
+      {showApiKeySetup && <ApiKeySetup onApiKeySet={handleApiKeySet} />}
+      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center space-x-3">
@@ -383,11 +407,58 @@ export function UnifiedAITool() {
           </h1>
           <p className="text-gray-600">Unified AI-powered content creation and enhancement platform</p>
         </div>
-        <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary-50 to-secondary-50 rounded-lg border border-primary-200">
-          <Sparkles className="w-4 h-4 text-primary-600" />
-          <span className="text-sm font-medium text-primary-700">AI Enhanced</span>
+        <div className="flex items-center space-x-3">
+          {!isApiConfigured && (
+            <Button
+              onClick={() => setShowApiKeySetup(true)}
+              variant="outline"
+              icon={Key}
+              className="border-warning-300 text-warning-700 hover:bg-warning-50"
+            >
+              Configure API
+            </Button>
+          )}
+          <div className={`flex items-center space-x-2 px-4 py-2 rounded-lg border ${
+            isApiConfigured 
+              ? 'bg-gradient-to-r from-success-50 to-primary-50 border-success-200' 
+              : 'bg-gradient-to-r from-warning-50 to-error-50 border-warning-200'
+          }`}>
+            {isApiConfigured ? (
+              <>
+                <Sparkles className="w-4 h-4 text-success-600" />
+                <span className="text-sm font-medium text-success-700">AI Connected</span>
+              </>
+            ) : (
+              <>
+                <AlertTriangle className="w-4 h-4 text-warning-600" />
+                <span className="text-sm font-medium text-warning-700">Demo Mode</span>
+              </>
+            )}
+          </div>
         </div>
       </div>
+
+      {!isApiConfigured && (
+        <Card className="border-warning-200 bg-warning-50">
+          <div className="flex items-start space-x-3">
+            <AlertTriangle className="w-5 h-5 text-warning-600 mt-0.5" />
+            <div>
+              <h3 className="text-sm font-semibold text-warning-800 mb-1">Demo Mode Active</h3>
+              <p className="text-sm text-warning-700 mb-3">
+                You're currently using simulated AI responses. Connect your OpenAI API key to unlock real AI-powered content generation with dynamic, intelligent responses.
+              </p>
+              <Button
+                onClick={() => setShowApiKeySetup(true)}
+                size="sm"
+                icon={Key}
+                className="bg-warning-600 hover:bg-warning-700"
+              >
+                Connect OpenAI API
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Task Type Selection */}
       <Card>
