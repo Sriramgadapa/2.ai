@@ -130,12 +130,12 @@ export class AITransformerEngine {
 
   private mapToOpenAIModel(modelId: string): string {
     const modelMap: Record<string, string> = {
-      'gpt-4-turbo': 'gpt-4-turbo-preview',
+      'gpt-4-turbo': 'gpt-4-turbo',
       'gpt-4': 'gpt-4',
       'gpt-3.5-turbo': 'gpt-3.5-turbo',
-      'claude-3-opus': 'gpt-4-turbo-preview', // Fallback to GPT-4
-      'gemini-pro': 'gpt-4-turbo-preview', // Fallback to GPT-4
-      'creative-writer': 'gpt-4-turbo-preview',
+      'claude-3-opus': 'gpt-4-turbo', // Fallback to GPT-4
+      'gemini-pro': 'gpt-4-turbo', // Fallback to GPT-4
+      'creative-writer': 'gpt-4-turbo',
       'analytical-mind': 'gpt-4'
     };
 
