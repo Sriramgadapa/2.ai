@@ -2,9 +2,9 @@ import { AIModel } from '../../types/ai';
 
 export const AI_MODELS: AIModel[] = [
   {
-    id: 'gpt-4-turbo',
-    name: 'GPT-4 Turbo',
-    description: 'Most capable model for complex reasoning and creative tasks',
+    id: 'gemini-pro',
+    name: 'Gemini Pro',
+    description: 'Google\'s most capable model for complex reasoning and creative tasks',
     category: 'language',
     capabilities: ['text-generation', 'reasoning', 'analysis', 'creative-writing'],
     parameters: {
@@ -15,11 +15,11 @@ export const AI_MODELS: AIModel[] = [
     }
   },
   {
-    id: 'claude-3-opus',
-    name: 'Claude 3 Opus',
-    description: 'Excellent for nuanced writing and complex analysis',
-    category: 'language',
-    capabilities: ['text-generation', 'analysis', 'creative-writing', 'code-generation'],
+    id: 'gemini-pro-vision',
+    name: 'Gemini Pro Vision',
+    description: 'Multimodal model capable of understanding text and images',
+    category: 'multimodal',
+    capabilities: ['text-generation', 'image-analysis', 'reasoning', 'creative-writing'],
     parameters: {
       temperature: 0.6,
       maxTokens: 4096,
@@ -28,11 +28,24 @@ export const AI_MODELS: AIModel[] = [
     }
   },
   {
-    id: 'gemini-pro',
-    name: 'Gemini Pro',
-    description: 'Google\'s advanced multimodal AI model',
-    category: 'multimodal',
-    capabilities: ['text-generation', 'image-analysis', 'reasoning', 'code-generation'],
+    id: 'gemini-1.5-pro',
+    name: 'Gemini 1.5 Pro',
+    description: 'Advanced model with extended context window and enhanced capabilities',
+    category: 'language',
+    capabilities: ['text-generation', 'analysis', 'creative-writing', 'code-generation'],
+    parameters: {
+      temperature: 0.6,
+      maxTokens: 8192,
+      topP: 0.8,
+      frequencyPenalty: 0.0
+    }
+  },
+  {
+    id: 'gemini-flash',
+    name: 'Gemini Flash',
+    description: 'Fast and efficient model optimized for quick responses',
+    category: 'language',
+    capabilities: ['text-generation', 'reasoning', 'quick-responses'],
     parameters: {
       temperature: 0.8,
       maxTokens: 2048,

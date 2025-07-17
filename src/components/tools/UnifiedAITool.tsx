@@ -26,7 +26,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { aiEngine } from '../../lib/ai/transformers';
-import { openaiClient } from '../../lib/ai/openai-client';
+import { geminiClient } from '../../lib/ai/gemini-client';
 import { TransformerConfig, AIResponse } from '../../types/ai';
 
 type ToolType = 'unified';
@@ -60,12 +60,12 @@ export function UnifiedAITool() {
 
   // Check if API is configured on component mount
   useEffect(() => {
-    const savedApiKey = localStorage.getItem('openai_api_key');
+    const savedApiKey = localStorage.getItem('gemini_api_key');
     if (savedApiKey) {
       aiEngine.setApiKey(savedApiKey);
       setIsApiConfigured(true);
     } else {
-      setIsApiConfigured(openaiClient.isConfigured());
+      setIsApiConfigured(geminiClient.isConfigured());
     }
   }, []);
 
@@ -444,7 +444,7 @@ export function UnifiedAITool() {
             {isApiConfigured ? (
               <>
                 <Sparkles className="w-4 h-4 text-success-600" />
-                <span className="text-sm font-medium text-success-700">AI Connected</span>
+                <span className="text-sm font-medium text-success-700">Gemini Connected</span>
               </>
             ) : (
               <>
@@ -463,7 +463,7 @@ export function UnifiedAITool() {
             <div>
               <h3 className="text-sm font-semibold text-warning-800 mb-1">Demo Mode Active</h3>
               <p className="text-sm text-warning-700 mb-3">
-                You're currently using simulated AI responses. Connect your OpenAI API key to unlock real AI-powered content generation with dynamic, intelligent responses.
+                You're currently using simulated AI responses. Connect your Gemini API key to unlock real AI-powered content generation with dynamic, intelligent responses.
               </p>
               <Button
                 onClick={() => setShowApiKeySetup(true)}
@@ -471,7 +471,7 @@ export function UnifiedAITool() {
                 icon={Key}
                 className="bg-warning-600 hover:bg-warning-700"
               >
-                Connect OpenAI API
+                Connect Gemini API
               </Button>
             </div>
           </div>

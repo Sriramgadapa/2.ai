@@ -1,16 +1,16 @@
 import { AIRequest, AIResponse, TransformerConfig } from '../../types/ai';
 import { AI_MODELS, TRANSFORMER_ENHANCERS } from './models';
-import { openaiClient } from './openai-client';
+import { geminiClient } from './gemini-client';
 
 export class AITransformerEngine {
   private fallbackMode: boolean = false;
 
   constructor() {
-    this.fallbackMode = !openaiClient.isConfigured();
+    this.fallbackMode = !geminiClient.isConfigured();
   }
 
   setApiKey(apiKey: string) {
-    openaiClient.setApiKey(apiKey);
+    geminiClient.setApiKey(apiKey);
     this.fallbackMode = false;
   }
 
@@ -26,12 +26,12 @@ export class AITransformerEngine {
       
       let response;
       
-      if (this.fallbackMode || !openaiClient.isConfigured()) {
-        console.log('Using fallback mode - OpenAI not configured');
+      if (this.fallbackMode || !geminiClient.isConfigured()) {
+        console.log('Using fallback mode - Gemini not configured');
         response = await this.processWithFallback(request);
       } else {
-        console.log('Using OpenAI API');
-        response = await this.processWithOpenAI(request);
+        console.log('Using Gemini API');
+        response = await this.processWithGemini(request);
       }
       
       const processingTime = Date.now() - startTime;
@@ -61,14 +61,14 @@ export class AITransformerEngine {
         const processingTime = Date.now() - startTime;
         
         return {
-          content: `⚠️ **Error: ${error.message}**\n\n---\n\n**Fallback Response:**\n\n${fallbackResponse.content}\n\n---\n\n*Configure your OpenAI API key for real AI-powered content generation.*`,
+          content: `⚠️ **Error: ${error.message}**\n\n---\n\n**Fallback Response:**\n\n${fallbackResponse.content}\n\n---\n\n*Configure your Gemini API key for real AI-powered content generation.*`,
           model: request.config.model,
           confidence: 0.3,
           processingTime,
           enhancementsApplied: request.config.enhancers || [],
           suggestions: [
-            'Check your OpenAI API key configuration',
-            'Verify your OpenAI account has sufficient credits',
+            'Check your Gemini API key configuration',
+            'Verify your Google Cloud account has sufficient credits',
             'Try again in a few moments'
           ]
         };
@@ -88,7 +88,7 @@ export class AITransformerEngine {
     }
   }
 
-  private async processWithOpenAI(request: AIRequest): Promise<{
+  private async processWithGemini(request: AIRequest): Promise<{
     content: string;
     confidence: number;
     suggestions: string[];
@@ -100,7 +100,7 @@ export class AITransformerEngine {
     // Build comprehensive system prompt
     const systemPrompt = this.buildSystemPrompt(request, model, enhancers, toolType);
     
-    console.log('Sending request to OpenAI:', {
+    console.log('Sending request to Gemini:', {
       model: request.config.model,
       temperature: request.config.temperature,
       maxTokens: request.config.maxTokens,
@@ -108,9 +108,9 @@ export class AITransformerEngine {
       systemPromptLength: systemPrompt.length
     });
     
-    // Generate content using OpenAI
-    const content = await openaiClient.generateContent(request.prompt, {
-      model: this.mapToOpenAIModel(request.config.model),
+    // Generate content using Gemini
+    const content = await geminiClient.generateContent(request.prompt, {
+      model: this.mapToGeminiModel(request.config.model),
       temperature: request.config.temperature,
       maxTokens: request.config.maxTokens,
       systemPrompt
@@ -119,7 +119,7 @@ export class AITransformerEngine {
     const confidence = this.calculateRealConfidence(model, enhancers, toolType, content);
     const suggestions = this.generateIntelligentSuggestions(request.prompt, content, toolType);
     
-    console.log('OpenAI response received:', {
+    console.log('Gemini response received:', {
       contentLength: content.length,
       confidence,
       suggestionsCount: suggestions.length
@@ -178,18 +178,18 @@ IMPORTANT: Always provide complete, well-structured, and valuable content. Do no
     return prompt;
   }
 
-  private mapToOpenAIModel(modelId: string): string {
+  private mapToGeminiModel(modelId: string): string {
     const modelMap: Record<string, string> = {
-      'gpt-4-turbo': 'gpt-4-turbo-preview',
-      'gpt-4': 'gpt-4',
-      'gpt-3.5-turbo': 'gpt-3.5-turbo',
-      'claude-3-opus': 'gpt-4-turbo-preview', // Fallback to GPT-4
-      'gemini-pro': 'gpt-4-turbo-preview', // Fallback to GPT-4
-      'creative-writer': 'gpt-4-turbo-preview',
-      'analytical-mind': 'gpt-4'
+      'gpt-4-turbo': 'gemini-pro',
+      'gpt-4': 'gemini-pro',
+      'gpt-3.5-turbo': 'gemini-pro',
+      'claude-3-opus': 'gemini-pro',
+      'gemini-pro': 'gemini-pro',
+      'creative-writer': 'gemini-pro',
+      'analytical-mind': 'gemini-pro'
     };
 
-    return modelMap[modelId] || 'gpt-3.5-turbo';
+    return modelMap[modelId] || 'gemini-pro';
   }
 
   private calculateRealConfidence(model: any, enhancers: string[], toolType: string, content: string): number {
@@ -299,7 +299,7 @@ IMPORTANT: Always provide complete, well-structured, and valuable content. Do no
       content,
       confidence: 0.65,
       suggestions: [
-        'Configure OpenAI API key for real AI-powered responses',
+        'Configure Gemini API key for real AI-powered responses',
         'This is a high-quality simulated response for demonstration',
         'Real AI integration will provide even better, more personalized results'
       ]
@@ -398,7 +398,7 @@ This comprehensive exploration of ${topic} provides the strategic foundation nee
 4. Execute with regular monitoring and adjustment
 
 ---
-*Generated by ContentAI - Professional AI Content Creation Platform*`;
+*Generated by ContentAI with Google Gemini - Professional AI Content Creation Platform*`;
 
       // Adjust content length based on preference
       if (lengthMultiplier < 1) {
@@ -410,7 +410,7 @@ This comprehensive exploration of ${topic} provides the strategic foundation nee
       return baseContent;
     } catch (error: any) {
       console.error('Error generating enhanced fallback content:', error);
-      return `# Generated Content\n\n**Topic**: ${prompt}\n\nThis is professional content generated based on your request. The system has processed your input and created relevant, high-quality content suitable for your needs.\n\n## Key Features:\n- Professional quality\n- Tailored approach\n- Ready to use\n\n*This is demonstration content. Configure OpenAI API for enhanced results.*`;
+      return `# Generated Content\n\n**Topic**: ${prompt}\n\nThis is professional content generated based on your request. The system has processed your input and created relevant, high-quality content suitable for your needs.\n\n## Key Features:\n- Professional quality\n- Tailored approach\n- Ready to use\n\n*This is demonstration content. Configure Gemini API for enhanced results.*`;
     }
   }
 
@@ -453,7 +453,7 @@ ${this.applyRewriteStyle(originalText, style)}
 - Adapt the tone further based on your target audience feedback
 
 ---
-*Enhanced by ContentAI - Professional AI Content Enhancement Platform*`;
+*Enhanced by ContentAI with Google Gemini - Professional AI Content Enhancement Platform*`;
   }
 
   private summarizeEnhancedFallbackContent(prompt: string, preferences: any): string {
@@ -498,7 +498,7 @@ ${this.generateSummaryByType(originalText, summaryType, summaryLength)}
 - Reference for follow-up discussions and action planning
 
 ---
-*Summarized by ContentAI - Intelligent Content Processing Platform*`;
+*Summarized by ContentAI with Google Gemini - Intelligent Content Processing Platform*`;
   }
 
   private translateEnhancedFallbackContent(prompt: string, preferences: any): string {
@@ -529,7 +529,7 @@ ${originalText}
 
 ## Professional Translation (${languages[toLang] || toLang})
 
-*Note: This is a demonstration of translation capabilities. Configure OpenAI API key for accurate, professional translations.*
+*Note: This is a demonstration of translation capabilities. Configure Gemini API key for accurate, professional translations.*
 
 **Professional Translation Services Include:**
 - Cultural adaptation and localization
@@ -568,7 +568,7 @@ ${originalText}
 - Maintain translation memory for consistency
 
 ---
-*Translated by ContentAI - Professional Translation Services*`;
+*Translated by ContentAI with Google Gemini - Professional Translation Services*`;
   }
 
   // Helper methods for enhanced fallback content
