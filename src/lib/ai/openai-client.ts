@@ -5,10 +5,10 @@ class OpenAIClient {
   private apiKey: string | null = null;
 
   constructor() {
-    // Try to get API key from environment variables
-    this.apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    // Try to get API key from localStorage first, then environment variables
+    this.apiKey = localStorage.getItem('openai_api_key') || import.meta.env.VITE_OPENAI_API_KEY;
     
-    if (this.apiKey && this.apiKey !== 'your_openai_api_key_here') {
+    if (this.apiKey && this.apiKey !== 'your_openai_api_key_here' && this.apiKey.startsWith('sk-')) {
       this.client = new OpenAI({
         apiKey: this.apiKey,
         dangerouslyAllowBrowser: true
@@ -22,10 +22,28 @@ class OpenAIClient {
       apiKey: apiKey,
       dangerouslyAllowBrowser: true
     });
+    // Store in localStorage for persistence
+    localStorage.setItem('openai_api_key', apiKey);
   }
 
   isConfigured(): boolean {
-    return this.client !== null && this.apiKey !== null;
+    return this.client !== null && this.apiKey !== null && this.apiKey.startsWith('sk-');
+  }
+
+  async testConnection(): Promise<boolean> {
+    if (!this.client) return false;
+    
+    try {
+      await this.client.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: 'Hello' }],
+        max_tokens: 5
+      });
+      return true;
+    } catch (error) {
+      console.error('OpenAI connection test failed:', error);
+      return false;
+    }
   }
 
   async generateContent(prompt: string, options: {
@@ -61,18 +79,47 @@ class OpenAIClient {
 
     try {
       const completion = await this.client.chat.completions.create({
-        model,
+        model: this.mapModel(model),
         messages,
-        temperature,
-        max_tokens: maxTokens,
+        temperature: Math.max(0, Math.min(2, temperature)),
+        max_tokens: Math.max(1, Math.min(4000, maxTokens)),
         stream: false
       });
 
-      return completion.choices[0]?.message?.content || 'No response generated';
-    } catch (error) {
+      const content = completion.choices[0]?.message?.content;
+      if (!content) {
+        throw new Error('No content generated from OpenAI');
+      }
+
+      return content;
+    } catch (error: any) {
       console.error('OpenAI API Error:', error);
-      throw new Error(`Failed to generate content: ${error.message}`);
+      
+      // Provide more specific error messages
+      if (error.code === 'insufficient_quota') {
+        throw new Error('OpenAI API quota exceeded. Please check your billing.');
+      } else if (error.code === 'invalid_api_key') {
+        throw new Error('Invalid OpenAI API key. Please check your configuration.');
+      } else if (error.code === 'rate_limit_exceeded') {
+        throw new Error('Rate limit exceeded. Please try again in a moment.');
+      } else {
+        throw new Error(`OpenAI API Error: ${error.message || 'Unknown error'}`);
+      }
     }
+  }
+
+  private mapModel(modelId: string): string {
+    const modelMap: Record<string, string> = {
+      'gpt-4-turbo': 'gpt-4-turbo-preview',
+      'gpt-4': 'gpt-4',
+      'gpt-3.5-turbo': 'gpt-3.5-turbo',
+      'claude-3-opus': 'gpt-4-turbo-preview', // Fallback to GPT-4
+      'gemini-pro': 'gpt-4-turbo-preview', // Fallback to GPT-4
+      'creative-writer': 'gpt-4-turbo-preview',
+      'analytical-mind': 'gpt-4'
+    };
+
+    return modelMap[modelId] || 'gpt-3.5-turbo';
   }
 
   async generateStreamContent(prompt: string, options: {
@@ -110,10 +157,10 @@ class OpenAIClient {
 
     try {
       const stream = await this.client.chat.completions.create({
-        model,
+        model: this.mapModel(model),
         messages,
-        temperature,
-        max_tokens: maxTokens,
+        temperature: Math.max(0, Math.min(2, temperature)),
+        max_tokens: Math.max(1, Math.min(4000, maxTokens)),
         stream: true
       });
 
@@ -130,9 +177,9 @@ class OpenAIClient {
       }
 
       return fullContent;
-    } catch (error) {
+    } catch (error: any) {
       console.error('OpenAI API Error:', error);
-      throw new Error(`Failed to generate content: ${error.message}`);
+      throw new Error(`Failed to generate streaming content: ${error.message}`);
     }
   }
 }

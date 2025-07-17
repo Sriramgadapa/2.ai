@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Card } from '../ui/Card';
-import { Key, AlertCircle, CheckCircle, ExternalLink } from 'lucide-react';
+import { Key, AlertCircle, CheckCircle, ExternalLink, Loader } from 'lucide-react';
 import { aiEngine } from '../../lib/ai/transformers';
+import { openaiClient } from '../../lib/ai/openai-client';
 
 interface ApiKeySetupProps {
   onApiKeySet: () => void;
@@ -26,25 +27,50 @@ export function ApiKeySetup({ onApiKeySet }: ApiKeySetupProps) {
       return;
     }
 
+    if (apiKey.length < 20) {
+      setError('API key appears to be too short. Please check and try again.');
+      return;
+    }
+
     setIsValidating(true);
     setError('');
 
     try {
-      // Set the API key and test it
+      // Set the API key
       aiEngine.setApiKey(apiKey);
       
-      // Store in localStorage for persistence (in production, use secure storage)
-      localStorage.setItem('openai_api_key', apiKey);
+      // Test the connection
+      const isValid = await openaiClient.testConnection();
       
-      setSuccess(true);
-      setTimeout(() => {
-        onApiKeySet();
-      }, 1500);
-    } catch (err) {
-      setError('Invalid API key or connection failed. Please check your key and try again.');
+      if (isValid) {
+        setSuccess(true);
+        setTimeout(() => {
+          onApiKeySet();
+        }, 1500);
+      } else {
+        throw new Error('API key validation failed');
+      }
+    } catch (err: any) {
       console.error('API key validation failed:', err);
+      
+      // Provide specific error messages
+      if (err.message.includes('insufficient_quota')) {
+        setError('Your OpenAI account has insufficient credits. Please add credits to your account.');
+      } else if (err.message.includes('invalid_api_key')) {
+        setError('Invalid API key. Please check your key and try again.');
+      } else if (err.message.includes('rate_limit_exceeded')) {
+        setError('Rate limit exceeded. Please try again in a moment.');
+      } else {
+        setError('Failed to validate API key. Please check your key and internet connection.');
+      }
     } finally {
       setIsValidating(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !isValidating && !success && apiKey.trim()) {
+      handleSetApiKey();
     }
   };
 
@@ -60,18 +86,24 @@ export function ApiKeySetup({ onApiKeySet }: ApiKeySetupProps) {
         </div>
 
         <div className="space-y-4">
-          <Input
-            label="OpenAI API Key"
-            type="password"
-            placeholder="sk-..."
-            value={apiKey}
-            onChange={setApiKey}
-            error={error}
-            disabled={isValidating || success}
-          />
+          <div>
+            <Input
+              label="OpenAI API Key"
+              type="password"
+              placeholder="sk-..."
+              value={apiKey}
+              onChange={setApiKey}
+              error={error}
+              disabled={isValidating || success}
+              onKeyPress={handleKeyPress}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Your API key is stored locally and never sent to our servers
+            </p>
+          </div>
 
           {success && (
-            <div className="flex items-center space-x-2 p-3 bg-success-50 border border-success-200 rounded-lg">
+            <div className="flex items-center space-x-2 p-3 bg-success-50 border border-success-200 rounded-lg animate-fade-in">
               <CheckCircle className="w-5 h-5 text-success-600" />
               <span className="text-success-700 font-medium">API key configured successfully!</span>
             </div>
@@ -83,20 +115,35 @@ export function ApiKeySetup({ onApiKeySet }: ApiKeySetupProps) {
             disabled={!apiKey.trim() || isValidating || success}
             className="w-full"
           >
-            {success ? 'Connected!' : isValidating ? 'Validating...' : 'Connect to OpenAI'}
+            {success ? (
+              <>
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Connected!
+              </>
+            ) : isValidating ? (
+              <>
+                <Loader className="w-4 h-4 mr-2 animate-spin" />
+                Validating...
+              </>
+            ) : (
+              'Connect to OpenAI'
+            )}
           </Button>
 
           <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-start space-x-2">
-              <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+              <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
               <div className="text-sm text-blue-800">
-                <p className="font-medium mb-1">How to get your OpenAI API key:</p>
+                <p className="font-medium mb-2">How to get your OpenAI API key:</p>
                 <ol className="list-decimal list-inside space-y-1 text-blue-700">
                   <li>Visit <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-900">OpenAI API Keys</a></li>
                   <li>Sign in to your OpenAI account</li>
                   <li>Click "Create new secret key"</li>
                   <li>Copy and paste the key here</li>
                 </ol>
+                <p className="mt-2 text-xs text-blue-600">
+                  Note: You need credits in your OpenAI account to use the API
+                </p>
               </div>
             </div>
           </div>
