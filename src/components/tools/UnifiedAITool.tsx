@@ -157,7 +157,16 @@ export function UnifiedAITool() {
   const handleProcess = async () => {
     if (!input.trim()) return;
 
+    console.log('Starting content processing:', {
+      taskType,
+      inputLength: input.length,
+      config: config
+    });
+
     setLoading(true);
+    setOutput('');
+    setResponse(null);
+    
     try {
       let prompt = '';
       let contextType = '';
@@ -183,6 +192,8 @@ export function UnifiedAITool() {
           break;
       }
 
+      console.log('Generated prompt:', prompt.substring(0, 200) + '...');
+
       const aiResponse = await aiEngine.processRequest({
         prompt,
         config: {
@@ -205,11 +216,18 @@ export function UnifiedAITool() {
         }
       });
 
+      console.log('AI Response received:', {
+        contentLength: aiResponse.content.length,
+        confidence: aiResponse.confidence,
+        model: aiResponse.model
+      });
+
       setOutput(aiResponse.content);
       setResponse(aiResponse);
     } catch (error) {
       console.error('Processing failed:', error);
-      setOutput('Error: Failed to process content. Please check your API configuration and try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setOutput(`# Processing Error\n\n**Error**: ${errorMessage}\n\n**Troubleshooting Steps**:\n1. Check your internet connection\n2. Verify API key configuration (if using OpenAI)\n3. Try refreshing the page\n4. Contact support if the issue persists\n\n*The system will attempt to use fallback content generation.*`);
     } finally {
       setLoading(false);
     }
