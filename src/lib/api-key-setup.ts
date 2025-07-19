@@ -1,14 +1,14 @@
-// Auto-configure Black Box API key
-import { blackBoxClient } from './ai/gemini-client';
+// Auto-configure OpenAI API key
+import { openaiClient } from './ai/openai-client';
 import { aiEngine } from './ai/transformers';
 
 // Set the API key
-const apiKey = 'AIzaSyC3wNpMPjqk8t3zFCBlPTx7TT35fi4IjM4';
+const apiKey = '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';
 
 // Configure the clients
-blackBoxClient.setApiKey(apiKey);
+openaiClient.setApiKey(apiKey);
 aiEngine.setApiKey(apiKey);
 
-console.log('Black Box API key configured successfully');
+console.log('OpenAI API key configured successfully');
 
 export { apiKey };

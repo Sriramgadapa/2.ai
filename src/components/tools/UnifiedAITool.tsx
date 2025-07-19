@@ -26,7 +26,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { aiEngine } from '../../lib/ai/transformers';
-import { blackBoxClient } from '../../lib/ai/gemini-client';
+import { openaiClient } from '../../lib/ai/openai-client';
 import { TransformerConfig, AIResponse } from '../../types/ai';
 
 type ToolType = 'unified';
@@ -61,10 +61,10 @@ export function UnifiedAITool() {
   // Check if API is configured on component mount
   useEffect(() => {
     const checkApiConfiguration = () => {
-      const savedApiKey = localStorage.getItem('blackbox_api_key');
-      if (savedApiKey && savedApiKey.length > 10 && savedApiKey.startsWith('AIza')) {
+      const savedApiKey = localStorage.getItem('openai_api_key');
+      if (savedApiKey && savedApiKey.length > 10 && savedApiKey.startsWith('sk-')) {
         aiEngine.setApiKey(savedApiKey);
-        setIsApiConfigured(blackBoxClient.isConfigured());
+        setIsApiConfigured(openaiClient.isConfigured());
       } else {
         setIsApiConfigured(false);
       }
@@ -162,7 +162,7 @@ export function UnifiedAITool() {
     if (!input.trim()) return;
 
     // Check API configuration before processing
-    const isConfigured = blackBoxClient.isConfigured();
+    const isConfigured = openaiClient.isConfigured();
     setIsApiConfigured(isConfigured);
     
     console.log('Starting content processing:', {
@@ -260,7 +260,7 @@ export function UnifiedAITool() {
 
   const handleApiKeySet = () => {
     setShowApiKeySetup(false);
-    setIsApiConfigured(blackBoxClient.isConfigured());
+    setIsApiConfigured(openaiClient.isConfigured());
   };
 
   const getInputLabel = () => {
@@ -460,7 +460,7 @@ export function UnifiedAITool() {
             {isApiConfigured ? (
               <>
                 <Sparkles className="w-4 h-4 text-success-600" />
-                <span className="text-sm font-medium text-success-700">Black Box Connected</span>
+                <span className="text-sm font-medium text-success-700">OpenAI Connected</span>
               </>
             ) : (
               <>
@@ -479,7 +479,7 @@ export function UnifiedAITool() {
             <div>
               <h3 className="text-sm font-semibold text-warning-800 mb-1">Demo Mode Active</h3>
               <p className="text-sm text-warning-700 mb-3">
-                You're currently using simulated AI responses. Connect your Black Box API key to unlock real AI-powered content generation with dynamic, intelligent responses.
+                You're currently using simulated AI responses. Connect your OpenAI API key to unlock real AI-powered content generation with dynamic, intelligent responses.
               </p>
               <Button
                 onClick={() => setShowApiKeySetup(true)}
@@ -487,7 +487,7 @@ export function UnifiedAITool() {
                 icon={Key}
                 className="bg-warning-600 hover:bg-warning-700"
               >
-                Connect Black Box API
+                Connect OpenAI API
               </Button>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import { AIRequest, AIResponse, TransformerConfig } from '../../types/ai';
 import { AI_MODELS, TRANSFORMER_ENHANCERS } from './models';
-import { blackBoxClient } from './gemini-client';
+import { openaiClient } from './openai-client';
 
 export class AITransformerEngine {
   private fallbackMode: boolean = false;
@@ -10,11 +10,11 @@ export class AITransformerEngine {
   }
 
   private checkApiConfiguration() {
-    this.fallbackMode = !blackBoxClient.isConfigured();
+    this.fallbackMode = !openaiClient.isConfigured();
   }
 
   setApiKey(apiKey: string) {
-    blackBoxClient.setApiKey(apiKey);
+    openaiClient.setApiKey(apiKey);
     this.checkApiConfiguration();
   }
 
@@ -34,11 +34,11 @@ export class AITransformerEngine {
       this.checkApiConfiguration();
       
       if (this.fallbackMode) {
-        console.log('Using fallback mode - Black Box not configured');
+        console.log('Using fallback mode - OpenAI not configured');
         response = await this.processWithFallback(request);
       } else {
-        console.log('Using Black Box API');
-        response = await this.processWithBlackBox(request);
+        console.log('Using OpenAI API');
+        response = await this.processWithOpenAI(request);
       }
       
       const processingTime = Date.now() - startTime;
@@ -74,14 +74,14 @@ export class AITransformerEngine {
         const processingTime = Date.now() - startTime;
         
         return {
-          content: `⚠️ **Error: ${error.message}**\n\n---\n\n**Fallback Response:**\n\n${fallbackResponse.content}\n\n---\n\n*Configure your Black Box API key for real AI-powered content generation.*`,
+          content: `⚠️ **Error: ${error.message}**\n\n---\n\n**Fallback Response:**\n\n${fallbackResponse.content}\n\n---\n\n*Configure your OpenAI API key for real AI-powered content generation.*`,
           model: request.config.model,
           confidence: 0.3,
           processingTime,
           enhancementsApplied: request.config.enhancers || [],
           suggestions: [
-            'Check your Black Box API key configuration',
-            'Verify your Google Cloud account has sufficient credits',
+            'Check your OpenAI API key configuration',
+            'Verify your OpenAI account has sufficient credits',
             'Try again in a few moments'
           ]
         };
@@ -101,14 +101,14 @@ export class AITransformerEngine {
     }
   }
 
-  private async processWithBlackBox(request: AIRequest): Promise<{
+  private async processWithOpenAI(request: AIRequest): Promise<{
     content: string;
     confidence: number;
     suggestions: string[];
   }> {
     // Double-check configuration before proceeding
-    if (!blackBoxClient.isConfigured()) {
-      throw new Error('Black Box client not properly configured');
+    if (!openaiClient.isConfigured()) {
+      throw new Error('OpenAI client not properly configured');
     }
     
     const model = AI_MODELS.find(m => m.id === request.config.model);
@@ -118,7 +118,7 @@ export class AITransformerEngine {
     // Build comprehensive system prompt
     const systemPrompt = this.buildSystemPrompt(request, model, enhancers, toolType);
     
-    console.log('Sending request to Black Box:', {
+    console.log('Sending request to OpenAI:', {
       model: request.config.model,
       temperature: request.config.temperature,
       maxTokens: request.config.maxTokens,
@@ -126,9 +126,9 @@ export class AITransformerEngine {
       systemPromptLength: systemPrompt.length
     });
     
-    // Generate content using Black Box
-    const content = await blackBoxClient.generateContent(request.prompt, {
-      model: this.mapToBlackBoxModel(request.config.model),
+    // Generate content using OpenAI
+    const content = await openaiClient.generateContent(request.prompt, {
+      model: this.mapToOpenAIModel(request.config.model),
       temperature: request.config.temperature,
       maxTokens: request.config.maxTokens,
       systemPrompt
@@ -137,7 +137,7 @@ export class AITransformerEngine {
     const confidence = this.calculateRealConfidence(model, enhancers, toolType, content);
     const suggestions = this.generateIntelligentSuggestions(request.prompt, content, toolType);
     
-    console.log('Black Box response received:', {
+    console.log('OpenAI response received:', {
       contentLength: content.length,
       confidence,
       suggestionsCount: suggestions.length
@@ -196,7 +196,7 @@ IMPORTANT: Always provide complete, well-structured, and valuable content. Do no
     return prompt;
   }
 
-  private mapToBlackBoxModel(modelId: string): string {
+  private mapToOpenAIModel(modelId: string): string {
     const modelMap: Record<string, string> = {
       'gpt-4-turbo': 'gemini-pro',
       'gpt-4': 'gemini-pro',
@@ -207,7 +207,7 @@ IMPORTANT: Always provide complete, well-structured, and valuable content. Do no
       'analytical-mind': 'gemini-pro'
     };
 
-    return modelMap[modelId] || 'gemini-pro';
+    return modelMap[modelId] || 'gpt-3.5-turbo';
   }
 
   private calculateRealConfidence(model: any, enhancers: string[], toolType: string, content: string): number {
@@ -277,7 +277,7 @@ IMPORTANT: Always provide complete, well-structured, and valuable content. Do no
     
     // General suggestions
     suggestions.push('Save successful configurations for future use');
-    suggestions.push('Experiment with AI enhancers for improved results');
+    suggestions.push('Experiment with OpenAI models for improved results');
     
     return suggestions.slice(0, 3); // Return top 3 suggestions
   }
@@ -317,7 +317,7 @@ IMPORTANT: Always provide complete, well-structured, and valuable content. Do no
       content,
       confidence: 0.65,
       suggestions: [
-        'Configure Black Box API key for real AI-powered responses',
+        'Configure OpenAI API key for real AI-powered responses',
         'This is a high-quality simulated response for demonstration',
         'Real AI integration will provide even better, more personalized results'
       ]
@@ -428,7 +428,7 @@ This comprehensive exploration of ${topic} provides the strategic foundation nee
       return baseContent;
     } catch (error: any) {
       console.error('Error generating enhanced fallback content:', error);
-      return `# Generated Content\n\n**Topic**: ${prompt}\n\nThis is professional content generated based on your request. The system has processed your input and created relevant, high-quality content suitable for your needs.\n\n## Key Features:\n- Professional quality\n- Tailored approach\n- Ready to use\n\n*This is demonstration content. Configure Gemini API for enhanced results.*`;
+      return `# Generated Content\n\n**Topic**: ${prompt}\n\nThis is professional content generated based on your request. The system has processed your input and created relevant, high-quality content suitable for your needs.\n\n## Key Features:\n- Professional quality\n- Tailored approach\n- Ready to use\n\n*This is demonstration content. Configure OpenAI API for enhanced results.*`;
     }
   }
 
@@ -586,7 +586,7 @@ ${originalText}
 - Maintain translation memory for consistency
 
 ---
-*Translated by ContentAI with Black Box AI - Professional Translation Services*`;
+*Translated by ContentAI with OpenAI - Professional Translation Services*`;
   }
 
   // Helper methods for enhanced fallback content

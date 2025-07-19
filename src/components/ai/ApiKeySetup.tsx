@@ -4,7 +4,7 @@ import { Input } from '../ui/Input';
 import { Card } from '../ui/Card';
 import { Key, AlertCircle, CheckCircle, ExternalLink, Loader } from 'lucide-react';
 import { aiEngine } from '../../lib/ai/transformers';
-import { geminiClient } from '../../lib/ai/gemini-client';
+import { openaiClient } from '../../lib/ai/openai-client';
 
 interface ApiKeySetupProps {
   onApiKeySet: () => void;
@@ -22,12 +22,12 @@ export function ApiKeySetup({ onApiKeySet }: ApiKeySetupProps) {
       return;
     }
 
-    if (!apiKey.startsWith('AIza')) {
-      setError('Gemini API keys should start with "AIza"');
+    if (!apiKey.startsWith('sk-')) {
+      setError('OpenAI API keys should start with "sk-"');
       return;
     }
 
-    if (apiKey.length < 20) {
+    if (apiKey.length < 40) {
       setError('API key appears to be too short. Please check and try again.');
       return;
     }
@@ -40,7 +40,7 @@ export function ApiKeySetup({ onApiKeySet }: ApiKeySetupProps) {
       aiEngine.setApiKey(apiKey);
       
       // Test the connection
-      const isValid = await geminiClient.testConnection();
+      const isValid = await openaiClient.testConnection();
       
       if (isValid) {
         setSuccess(true);
@@ -55,7 +55,7 @@ export function ApiKeySetup({ onApiKeySet }: ApiKeySetupProps) {
       
       // Provide specific error messages
       if (err.message.includes('insufficient_quota')) {
-        setError('Your Google Cloud account has insufficient credits. Please add credits to your account.');
+        setError('Your OpenAI account has insufficient credits. Please add credits to your account.');
       } else if (err.message.includes('invalid_api_key')) {
         setError('Invalid API key. Please check your key and try again.');
       } else if (err.message.includes('rate_limit_exceeded')) {
@@ -81,17 +81,16 @@ export function ApiKeySetup({ onApiKeySet }: ApiKeySetupProps) {
           <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Key className="w-8 h-8 text-primary-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Connect to Google Gemini</h2>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Connect to Black Box AI</h2>
-          <p className="text-gray-600">Enter your Black Box API key to enable real AI-powered content generation</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Connect to OpenAI</h2>
+          <p className="text-gray-600">Enter your OpenAI API key to enable real AI-powered content generation</p>
         </div>
 
         <div className="space-y-4">
           <div>
             <Input
-              label="Black Box API Key"
+              label="OpenAI API Key"
               type="password"
-              placeholder="AIza..."
+              placeholder="sk-..."
               value={apiKey}
               onChange={setApiKey}
               error={error}
@@ -127,7 +126,7 @@ export function ApiKeySetup({ onApiKeySet }: ApiKeySetupProps) {
                 Validating...
               </>
             ) : (
-              'Connect to Black Box'
+              'Connect to OpenAI'
             )}
           </Button>
 
@@ -135,15 +134,15 @@ export function ApiKeySetup({ onApiKeySet }: ApiKeySetupProps) {
             <div className="flex items-start space-x-2">
               <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
               <div className="text-sm text-blue-800">
-                <p className="font-medium mb-2">How to get your Black Box API key:</p>
+                <p className="font-medium mb-2">How to get your OpenAI API key:</p>
                 <ol className="list-decimal list-inside space-y-1 text-blue-700">
-                  <li>Visit <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-900">Google AI Studio</a></li>
-                  <li>Sign in to your Google account</li>
+                  <li>Visit <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-900">OpenAI API Keys</a></li>
+                  <li>Sign in to your OpenAI account</li>
                   <li>Click "Create new secret key"</li>
                   <li>Copy and paste the key here</li>
                 </ol>
                 <p className="mt-2 text-xs text-blue-600">
-                  Note: Black Box API has a generous free tier for getting started
+                  Note: OpenAI API requires credits but offers $5 free for new accounts
                 </p>
               </div>
             </div>
@@ -151,7 +150,7 @@ export function ApiKeySetup({ onApiKeySet }: ApiKeySetupProps) {
 
           <div className="text-center">
             <a
-              href="https://makersuite.google.com/app/apikey"
+              href="https://platform.openai.com/api-keys"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center space-x-1 text-sm text-primary-600 hover:text-primary-700"
