@@ -127,7 +127,6 @@ export function ApiKeySetup({ onApiKeySet }: ApiKeySetupProps) {
                 Validating...
               </>
             ) : (
-              'Connect to Gemini'
               'Connect to Black Box'
             )}
           </Button>
