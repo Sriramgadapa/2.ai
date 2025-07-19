@@ -6,12 +6,16 @@ export class AITransformerEngine {
   private fallbackMode: boolean = false;
 
   constructor() {
+    this.checkApiConfiguration();
+  }
+
+  private checkApiConfiguration() {
     this.fallbackMode = !geminiClient.isConfigured();
   }
 
   setApiKey(apiKey: string) {
     geminiClient.setApiKey(apiKey);
-    this.fallbackMode = false;
+    this.checkApiConfiguration();
   }
 
   async processRequest(request: AIRequest): Promise<AIResponse> {
@@ -26,7 +30,10 @@ export class AITransformerEngine {
       
       let response;
       
-      if (this.fallbackMode || !geminiClient.isConfigured()) {
+      // Always check configuration status before attempting API call
+      this.checkApiConfiguration();
+      
+      if (this.fallbackMode) {
         console.log('Using fallback mode - Gemini not configured');
         response = await this.processWithFallback(request);
       } else {
@@ -54,6 +61,12 @@ export class AITransformerEngine {
           model: request.config.model
         }
       });
+      
+      // If it's an API key error, switch to fallback mode
+      if (error.message?.includes('API key') || error.message?.includes('API_KEY_INVALID')) {
+        console.log('API key error detected, switching to fallback mode');
+        this.fallbackMode = true;
+      }
       
       // Fallback to simulated response if real AI fails
       try {
@@ -93,6 +106,11 @@ export class AITransformerEngine {
     confidence: number;
     suggestions: string[];
   }> {
+    // Double-check configuration before proceeding
+    if (!geminiClient.isConfigured()) {
+      throw new Error('Gemini client not properly configured');
+    }
+    
     const model = AI_MODELS.find(m => m.id === request.config.model);
     const enhancers = request.config.enhancers || [];
     const toolType = request.context?.toolType || 'generate';

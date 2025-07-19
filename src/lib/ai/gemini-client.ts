@@ -29,13 +29,13 @@ class GeminiClient {
 
   setApiKey(apiKey: string) {
     this.apiKey = apiKey;
-    this.initializeClient();
     // Store in localStorage for persistence
     localStorage.setItem('gemini_api_key', apiKey);
+    this.initializeClient();
   }
 
   isConfigured(): boolean {
-    return this.client !== null && this.model !== null && this.apiKey !== null;
+    return this.client !== null && this.model !== null && this.apiKey !== null && this.apiKey.length > 10 && this.apiKey.startsWith('AIza');
   }
 
   async testConnection(): Promise<boolean> {
@@ -57,7 +57,7 @@ class GeminiClient {
     maxTokens?: number;
     systemPrompt?: string;
   } = {}): Promise<string> {
-    if (!this.model) {
+    if (!this.isConfigured()) {
       throw new Error('Gemini client not configured. Please set your API key.');
     }
 
@@ -100,7 +100,7 @@ class GeminiClient {
       console.error('Gemini API Error:', error);
       
       // Provide more specific error messages
-      if (error.message?.includes('API_KEY_INVALID')) {
+      if (error.message?.includes('API_KEY_INVALID') || error.message?.includes('API Key not found')) {
         throw new Error('Invalid Gemini API key. Please check your configuration.');
       } else if (error.message?.includes('QUOTA_EXCEEDED')) {
         throw new Error('Gemini API quota exceeded. Please check your billing.');
@@ -135,7 +135,7 @@ class GeminiClient {
     systemPrompt?: string;
     onChunk?: (chunk: string) => void;
   } = {}): Promise<string> {
-    if (!this.model) {
+    if (!this.isConfigured()) {
       throw new Error('Gemini client not configured. Please set your API key.');
     }
 
@@ -190,7 +190,7 @@ class GeminiClient {
     temperature?: number;
     maxTokens?: number;
   } = {}): Promise<string> {
-    if (!this.model) {
+    if (!this.isConfigured()) {
       throw new Error('Gemini client not configured. Please set your API key.');
     }
 

@@ -60,13 +60,17 @@ export function UnifiedAITool() {
 
   // Check if API is configured on component mount
   useEffect(() => {
-    const savedApiKey = localStorage.getItem('gemini_api_key');
-    if (savedApiKey) {
-      aiEngine.setApiKey(savedApiKey);
-      setIsApiConfigured(true);
-    } else {
-      setIsApiConfigured(geminiClient.isConfigured());
-    }
+    const checkApiConfiguration = () => {
+      const savedApiKey = localStorage.getItem('gemini_api_key');
+      if (savedApiKey && savedApiKey.length > 10 && savedApiKey.startsWith('AIza')) {
+        aiEngine.setApiKey(savedApiKey);
+        setIsApiConfigured(geminiClient.isConfigured());
+      } else {
+        setIsApiConfigured(false);
+      }
+    };
+    
+    checkApiConfiguration();
   }, []);
 
   const taskTypes = [
@@ -157,10 +161,15 @@ export function UnifiedAITool() {
   const handleProcess = async () => {
     if (!input.trim()) return;
 
+    // Check API configuration before processing
+    const isConfigured = geminiClient.isConfigured();
+    setIsApiConfigured(isConfigured);
+    
     console.log('Starting content processing:', {
       taskType,
       inputLength: input.length,
-      config: config
+      config: config,
+      apiConfigured: isConfigured
     });
 
     setLoading(true);
@@ -227,7 +236,14 @@ export function UnifiedAITool() {
     } catch (error) {
       console.error('Processing failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      setOutput(`# Processing Error\n\n**Error**: ${errorMessage}\n\n**Troubleshooting Steps**:\n1. Check your internet connection\n2. Verify API key configuration (if using OpenAI)\n3. Try refreshing the page\n4. Contact support if the issue persists\n\n*The system will attempt to use fallback content generation.*`);
+      
+      // Check if it's an API key related error
+      if (errorMessage.includes('API key') || errorMessage.includes('not configured')) {
+        setIsApiConfigured(false);
+        setOutput(`# API Configuration Required\n\n**Error**: ${errorMessage}\n\n**To resolve this issue:**\n1. Click the "Configure API" button above\n2. Enter your valid Gemini API key\n3. The key should start with "AIza" and be at least 20 characters long\n4. Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey)\n\n*The system is currently using demo mode with simulated responses.*`);
+      } else {
+        setOutput(`# Processing Error\n\n**Error**: ${errorMessage}\n\n**Troubleshooting Steps**:\n1. Check your internet connection\n2. Verify API key configuration\n3. Try refreshing the page\n4. Contact support if the issue persists\n\n*The system will attempt to use fallback content generation.*`);
+      }
     } finally {
       setLoading(false);
     }
@@ -244,7 +260,7 @@ export function UnifiedAITool() {
 
   const handleApiKeySet = () => {
     setShowApiKeySetup(false);
-    setIsApiConfigured(true);
+    setIsApiConfigured(geminiClient.isConfigured());
   };
 
   const getInputLabel = () => {
