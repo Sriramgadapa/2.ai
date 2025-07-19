@@ -1,6 +1,6 @@
 import { AIRequest, AIResponse, TransformerConfig } from '../../types/ai';
 import { AI_MODELS, TRANSFORMER_ENHANCERS } from './models';
-import { geminiClient } from './gemini-client';
+import { blackBoxClient } from './gemini-client';
 
 export class AITransformerEngine {
   private fallbackMode: boolean = false;
@@ -10,11 +10,11 @@ export class AITransformerEngine {
   }
 
   private checkApiConfiguration() {
-    this.fallbackMode = !geminiClient.isConfigured();
+    this.fallbackMode = !blackBoxClient.isConfigured();
   }
 
   setApiKey(apiKey: string) {
-    geminiClient.setApiKey(apiKey);
+    blackBoxClient.setApiKey(apiKey);
     this.checkApiConfiguration();
   }
 
@@ -34,11 +34,11 @@ export class AITransformerEngine {
       this.checkApiConfiguration();
       
       if (this.fallbackMode) {
-        console.log('Using fallback mode - Gemini not configured');
+        console.log('Using fallback mode - Black Box not configured');
         response = await this.processWithFallback(request);
       } else {
-        console.log('Using Gemini API');
-        response = await this.processWithGemini(request);
+        console.log('Using Black Box API');
+        response = await this.processWithBlackBox(request);
       }
       
       const processingTime = Date.now() - startTime;
@@ -74,13 +74,13 @@ export class AITransformerEngine {
         const processingTime = Date.now() - startTime;
         
         return {
-          content: `⚠️ **Error: ${error.message}**\n\n---\n\n**Fallback Response:**\n\n${fallbackResponse.content}\n\n---\n\n*Configure your Gemini API key for real AI-powered content generation.*`,
+          content: `⚠️ **Error: ${error.message}**\n\n---\n\n**Fallback Response:**\n\n${fallbackResponse.content}\n\n---\n\n*Configure your Black Box API key for real AI-powered content generation.*`,
           model: request.config.model,
           confidence: 0.3,
           processingTime,
           enhancementsApplied: request.config.enhancers || [],
           suggestions: [
-            'Check your Gemini API key configuration',
+            'Check your Black Box API key configuration',
             'Verify your Google Cloud account has sufficient credits',
             'Try again in a few moments'
           ]
@@ -101,14 +101,14 @@ export class AITransformerEngine {
     }
   }
 
-  private async processWithGemini(request: AIRequest): Promise<{
+  private async processWithBlackBox(request: AIRequest): Promise<{
     content: string;
     confidence: number;
     suggestions: string[];
   }> {
     // Double-check configuration before proceeding
-    if (!geminiClient.isConfigured()) {
-      throw new Error('Gemini client not properly configured');
+    if (!blackBoxClient.isConfigured()) {
+      throw new Error('Black Box client not properly configured');
     }
     
     const model = AI_MODELS.find(m => m.id === request.config.model);
@@ -118,7 +118,7 @@ export class AITransformerEngine {
     // Build comprehensive system prompt
     const systemPrompt = this.buildSystemPrompt(request, model, enhancers, toolType);
     
-    console.log('Sending request to Gemini:', {
+    console.log('Sending request to Black Box:', {
       model: request.config.model,
       temperature: request.config.temperature,
       maxTokens: request.config.maxTokens,
@@ -126,9 +126,9 @@ export class AITransformerEngine {
       systemPromptLength: systemPrompt.length
     });
     
-    // Generate content using Gemini
-    const content = await geminiClient.generateContent(request.prompt, {
-      model: this.mapToGeminiModel(request.config.model),
+    // Generate content using Black Box
+    const content = await blackBoxClient.generateContent(request.prompt, {
+      model: this.mapToBlackBoxModel(request.config.model),
       temperature: request.config.temperature,
       maxTokens: request.config.maxTokens,
       systemPrompt
@@ -137,7 +137,7 @@ export class AITransformerEngine {
     const confidence = this.calculateRealConfidence(model, enhancers, toolType, content);
     const suggestions = this.generateIntelligentSuggestions(request.prompt, content, toolType);
     
-    console.log('Gemini response received:', {
+    console.log('Black Box response received:', {
       contentLength: content.length,
       confidence,
       suggestionsCount: suggestions.length
@@ -196,7 +196,7 @@ IMPORTANT: Always provide complete, well-structured, and valuable content. Do no
     return prompt;
   }
 
-  private mapToGeminiModel(modelId: string): string {
+  private mapToBlackBoxModel(modelId: string): string {
     const modelMap: Record<string, string> = {
       'gpt-4-turbo': 'gemini-pro',
       'gpt-4': 'gemini-pro',
@@ -317,7 +317,7 @@ IMPORTANT: Always provide complete, well-structured, and valuable content. Do no
       content,
       confidence: 0.65,
       suggestions: [
-        'Configure Gemini API key for real AI-powered responses',
+        'Configure Black Box API key for real AI-powered responses',
         'This is a high-quality simulated response for demonstration',
         'Real AI integration will provide even better, more personalized results'
       ]
@@ -416,7 +416,7 @@ This comprehensive exploration of ${topic} provides the strategic foundation nee
 4. Execute with regular monitoring and adjustment
 
 ---
-*Generated by ContentAI with Google Gemini - Professional AI Content Creation Platform*`;
+*Generated with ContentAI with Black Box AI - Professional AI Content Creation Platform*`;
 
       // Adjust content length based on preference
       if (lengthMultiplier < 1) {
@@ -471,7 +471,7 @@ ${this.applyRewriteStyle(originalText, style)}
 - Adapt the tone further based on your target audience feedback
 
 ---
-*Enhanced by ContentAI with Google Gemini - Professional AI Content Enhancement Platform*`;
+*Enhanced by ContentAI with Black Box AI - Professional AI Content Enhancement Platform*`;
   }
 
   private summarizeEnhancedFallbackContent(prompt: string, preferences: any): string {
@@ -516,7 +516,7 @@ ${this.generateSummaryByType(originalText, summaryType, summaryLength)}
 - Reference for follow-up discussions and action planning
 
 ---
-*Summarized by ContentAI with Google Gemini - Intelligent Content Processing Platform*`;
+*Summarized by ContentAI with Black Box AI - Intelligent Content Processing Platform*`;
   }
 
   private translateEnhancedFallbackContent(prompt: string, preferences: any): string {
@@ -586,7 +586,7 @@ ${originalText}
 - Maintain translation memory for consistency
 
 ---
-*Translated by ContentAI with Google Gemini - Professional Translation Services*`;
+*Translated by ContentAI with Black Box AI - Professional Translation Services*`;
   }
 
   // Helper methods for enhanced fallback content

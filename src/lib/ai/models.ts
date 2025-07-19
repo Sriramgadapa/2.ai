@@ -3,8 +3,8 @@ import { AIModel } from '../../types/ai';
 export const AI_MODELS: AIModel[] = [
   {
     id: 'gemini-pro',
-    name: 'Gemini Pro',
-    description: 'Google\'s most capable model for complex reasoning and creative tasks',
+    name: 'Black Box Pro',
+    description: 'Advanced AI model for complex reasoning and creative tasks',
     category: 'language',
     capabilities: ['text-generation', 'reasoning', 'analysis', 'creative-writing'],
     parameters: {
@@ -16,7 +16,7 @@ export const AI_MODELS: AIModel[] = [
   },
   {
     id: 'gemini-pro-vision',
-    name: 'Gemini Pro Vision',
+    name: 'Black Box Pro Vision',
     description: 'Multimodal model capable of understanding text and images',
     category: 'multimodal',
     capabilities: ['text-generation', 'image-analysis', 'reasoning', 'creative-writing'],
@@ -29,7 +29,7 @@ export const AI_MODELS: AIModel[] = [
   },
   {
     id: 'gemini-1.5-pro',
-    name: 'Gemini 1.5 Pro',
+    name: 'Black Box 1.5 Pro',
     description: 'Advanced model with extended context window and enhanced capabilities',
     category: 'language',
     capabilities: ['text-generation', 'analysis', 'creative-writing', 'code-generation'],
@@ -42,7 +42,7 @@ export const AI_MODELS: AIModel[] = [
   },
   {
     id: 'gemini-flash',
-    name: 'Gemini Flash',
+    name: 'Black Box Flash',
     description: 'Fast and efficient model optimized for quick responses',
     category: 'language',
     capabilities: ['text-generation', 'reasoning', 'quick-responses'],

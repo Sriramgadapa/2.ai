@@ -82,13 +82,14 @@ export function ApiKeySetup({ onApiKeySet }: ApiKeySetupProps) {
             <Key className="w-8 h-8 text-primary-600" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Connect to Google Gemini</h2>
-          <p className="text-gray-600">Enter your Gemini API key to enable real AI-powered content generation</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Connect to Black Box AI</h2>
+          <p className="text-gray-600">Enter your Black Box API key to enable real AI-powered content generation</p>
         </div>
 
         <div className="space-y-4">
           <div>
             <Input
-              label="Gemini API Key"
+              label="Black Box API Key"
               type="password"
               placeholder="AIza..."
               value={apiKey}
@@ -127,6 +128,7 @@ export function ApiKeySetup({ onApiKeySet }: ApiKeySetupProps) {
               </>
             ) : (
               'Connect to Gemini'
+              'Connect to Black Box'
             )}
           </Button>
 
@@ -134,7 +136,7 @@ export function ApiKeySetup({ onApiKeySet }: ApiKeySetupProps) {
             <div className="flex items-start space-x-2">
               <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
               <div className="text-sm text-blue-800">
-                <p className="font-medium mb-2">How to get your Gemini API key:</p>
+                <p className="font-medium mb-2">How to get your Black Box API key:</p>
                 <ol className="list-decimal list-inside space-y-1 text-blue-700">
                   <li>Visit <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-900">Google AI Studio</a></li>
                   <li>Sign in to your Google account</li>
@@ -142,7 +144,7 @@ export function ApiKeySetup({ onApiKeySet }: ApiKeySetupProps) {
                   <li>Copy and paste the key here</li>
                 </ol>
                 <p className="mt-2 text-xs text-blue-600">
-                  Note: Gemini API has a generous free tier for getting started
+                  Note: Black Box API has a generous free tier for getting started
                 </p>
               </div>
             </div>

@@ -64,7 +64,7 @@ Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu 
 This generated content provides a solid foundation that can be further refined based on your specific requirements and brand guidelines. The structure and tone have been optimized for maximum engagement with your target audience.
 
 ---
-*Generated with ContentAI - Professional AI Content Creation Platform*`;
+*Generated with ContentAI with Black Box AI - Professional AI Content Creation Platform*`;
 
     return new Response(
       JSON.stringify({ 

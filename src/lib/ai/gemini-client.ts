@@ -1,13 +1,13 @@
 import { GoogleGenerativeAI, GenerativeModel, ChatSession } from '@google/generative-ai';
 
-class GeminiClient {
+class BlackBoxClient {
   private client: GoogleGenerativeAI | null = null;
   private model: GenerativeModel | null = null;
   private apiKey: string | null = null;
 
   constructor() {
     // Try to get API key from localStorage first, then environment variables
-    this.apiKey = localStorage.getItem('gemini_api_key') || import.meta.env.VITE_GEMINI_API_KEY;
+    this.apiKey = localStorage.getItem('blackbox_api_key') || import.meta.env.VITE_BLACKBOX_API_KEY;
     
     if (this.apiKey && this.apiKey !== 'your_gemini_api_key_here' && this.apiKey.length > 10) {
       this.initializeClient();
@@ -21,7 +21,7 @@ class GeminiClient {
       this.client = new GoogleGenerativeAI(this.apiKey);
       this.model = this.client.getGenerativeModel({ model: 'gemini-pro' });
     } catch (error) {
-      console.error('Failed to initialize Gemini client:', error);
+      console.error('Failed to initialize Black Box client:', error);
       this.client = null;
       this.model = null;
     }
@@ -30,7 +30,7 @@ class GeminiClient {
   setApiKey(apiKey: string) {
     this.apiKey = apiKey;
     // Store in localStorage for persistence
-    localStorage.setItem('gemini_api_key', apiKey);
+    localStorage.setItem('blackbox_api_key', apiKey);
     this.initializeClient();
   }
 
@@ -46,7 +46,7 @@ class GeminiClient {
       const response = await result.response;
       return response.text().length > 0;
     } catch (error) {
-      console.error('Gemini connection test failed:', error);
+      console.error('Black Box connection test failed:', error);
       return false;
     }
   }
@@ -58,7 +58,7 @@ class GeminiClient {
     systemPrompt?: string;
   } = {}): Promise<string> {
     if (!this.isConfigured()) {
-      throw new Error('Gemini client not configured. Please set your API key.');
+      throw new Error('Black Box client not configured. Please set your API key.');
     }
 
     const {
@@ -97,19 +97,19 @@ class GeminiClient {
 
       return content;
     } catch (error: any) {
-      console.error('Gemini API Error:', error);
+      console.error('Black Box API Error:', error);
       
       // Provide more specific error messages
       if (error.message?.includes('API_KEY_INVALID') || error.message?.includes('API Key not found')) {
-        throw new Error('Invalid Gemini API key. Please check your configuration.');
+        throw new Error('Invalid Black Box API key. Please check your configuration.');
       } else if (error.message?.includes('QUOTA_EXCEEDED')) {
-        throw new Error('Gemini API quota exceeded. Please check your billing.');
+        throw new Error('Black Box API quota exceeded. Please check your billing.');
       } else if (error.message?.includes('RATE_LIMIT_EXCEEDED')) {
         throw new Error('Rate limit exceeded. Please try again in a moment.');
       } else if (error.message?.includes('SAFETY')) {
-        throw new Error('Content was blocked by Gemini safety filters. Please try rephrasing your request.');
+        throw new Error('Content was blocked by Black Box safety filters. Please try rephrasing your request.');
       } else {
-        throw new Error(`Gemini API Error: ${error.message || 'Unknown error'}`);
+        throw new Error(`Black Box API Error: ${error.message || 'Unknown error'}`);
       }
     }
   }
@@ -136,7 +136,7 @@ class GeminiClient {
     onChunk?: (chunk: string) => void;
   } = {}): Promise<string> {
     if (!this.isConfigured()) {
-      throw new Error('Gemini client not configured. Please set your API key.');
+      throw new Error('Black Box client not configured. Please set your API key.');
     }
 
     const {
@@ -181,7 +181,7 @@ class GeminiClient {
 
       return fullContent;
     } catch (error: any) {
-      console.error('Gemini API Error:', error);
+      console.error('Black Box API Error:', error);
       throw new Error(`Failed to generate streaming content: ${error.message}`);
     }
   }
@@ -191,7 +191,7 @@ class GeminiClient {
     maxTokens?: number;
   } = {}): Promise<string> {
     if (!this.isConfigured()) {
-      throw new Error('Gemini client not configured. Please set your API key.');
+      throw new Error('Black Box client not configured. Please set your API key.');
     }
 
     const {
@@ -226,10 +226,10 @@ class GeminiClient {
       
       return response.text();
     } catch (error: any) {
-      console.error('Gemini Chat API Error:', error);
+      console.error('Black Box Chat API Error:', error);
       throw new Error(`Failed to generate chat response: ${error.message}`);
     }
   }
 }
 
-export const geminiClient = new GeminiClient();
+export const blackBoxClient = new BlackBoxClient();

@@ -26,7 +26,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { aiEngine } from '../../lib/ai/transformers';
-import { geminiClient } from '../../lib/ai/gemini-client';
+import { blackBoxClient } from '../../lib/ai/gemini-client';
 import { TransformerConfig, AIResponse } from '../../types/ai';
 
 type ToolType = 'unified';
@@ -61,10 +61,10 @@ export function UnifiedAITool() {
   // Check if API is configured on component mount
   useEffect(() => {
     const checkApiConfiguration = () => {
-      const savedApiKey = localStorage.getItem('gemini_api_key');
+      const savedApiKey = localStorage.getItem('blackbox_api_key');
       if (savedApiKey && savedApiKey.length > 10 && savedApiKey.startsWith('AIza')) {
         aiEngine.setApiKey(savedApiKey);
-        setIsApiConfigured(geminiClient.isConfigured());
+        setIsApiConfigured(blackBoxClient.isConfigured());
       } else {
         setIsApiConfigured(false);
       }
@@ -162,7 +162,7 @@ export function UnifiedAITool() {
     if (!input.trim()) return;
 
     // Check API configuration before processing
-    const isConfigured = geminiClient.isConfigured();
+    const isConfigured = blackBoxClient.isConfigured();
     setIsApiConfigured(isConfigured);
     
     console.log('Starting content processing:', {
@@ -260,7 +260,7 @@ export function UnifiedAITool() {
 
   const handleApiKeySet = () => {
     setShowApiKeySetup(false);
-    setIsApiConfigured(geminiClient.isConfigured());
+    setIsApiConfigured(blackBoxClient.isConfigured());
   };
 
   const getInputLabel = () => {
@@ -460,7 +460,7 @@ export function UnifiedAITool() {
             {isApiConfigured ? (
               <>
                 <Sparkles className="w-4 h-4 text-success-600" />
-                <span className="text-sm font-medium text-success-700">Gemini Connected</span>
+                <span className="text-sm font-medium text-success-700">Black Box Connected</span>
               </>
             ) : (
               <>
@@ -479,7 +479,7 @@ export function UnifiedAITool() {
             <div>
               <h3 className="text-sm font-semibold text-warning-800 mb-1">Demo Mode Active</h3>
               <p className="text-sm text-warning-700 mb-3">
-                You're currently using simulated AI responses. Connect your Gemini API key to unlock real AI-powered content generation with dynamic, intelligent responses.
+                You're currently using simulated AI responses. Connect your Black Box API key to unlock real AI-powered content generation with dynamic, intelligent responses.
               </p>
               <Button
                 onClick={() => setShowApiKeySetup(true)}
@@ -487,7 +487,7 @@ export function UnifiedAITool() {
                 icon={Key}
                 className="bg-warning-600 hover:bg-warning-700"
               >
-                Connect Gemini API
+                Connect Black Box API
               </Button>
             </div>
           </div>
