@@ -57,7 +57,7 @@ The rewritten version incorporates modern writing techniques and best practices 
 This rewritten content is ready for immediate use and represents a significant improvement over the original text. The professional quality and enhanced readability make it suitable for any business or personal communication needs.
 
 ---
-*Rewritten with ContentAI - Professional AI Content Enhancement*`;
+*Enhanced by ContentAI with Black Box AI - Professional AI Content Enhancement Platform*`;
 
     return new Response(
       JSON.stringify({ 
