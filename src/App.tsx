@@ -1,17 +1,26 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Sidebar } from './components/layout/Sidebar';
-import { UnifiedAITool } from './components/tools/UnifiedAITool';
+import { AssistantDashboard } from './components/assistant/AssistantDashboard';
+import { DeviceControlPanel } from './components/assistant/DeviceControlPanel';
+import { VoiceCommandsPanel } from './components/assistant/VoiceCommandsPanel';
+import { SystemMonitor } from './components/assistant/SystemMonitor';
 import { Projects } from './components/workspace/Projects';
 import { History } from './components/workspace/History';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('ai-studio');
+  const [activeTab, setActiveTab] = useState('assistant');
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'ai-studio':
-        return <UnifiedAITool />;
+      case 'assistant':
+        return <AssistantDashboard />;
+      case 'device-control':
+        return <DeviceControlPanel />;
+      case 'voice-commands':
+        return <VoiceCommandsPanel />;
+      case 'system-monitor':
+        return <SystemMonitor />;
       case 'projects':
         return <Projects />;
       case 'history':
@@ -28,7 +37,7 @@ function App() {
           </div>
         );
       default:
-        return <UnifiedAITool />;
+        return <AssistantDashboard />;
     }
   };
 

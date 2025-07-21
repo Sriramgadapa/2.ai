@@ -1,11 +1,14 @@
 import React from 'react';
 import { 
-  Sparkles, 
+  Zap,
   FolderOpen, 
   History, 
   Heart,
   Settings,
-  Brain
+  Monitor,
+  Mic,
+  Activity,
+  Smartphone
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -14,7 +17,10 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { id: 'ai-studio', label: 'AI Studio', icon: Brain, badge: 'ALL-IN-ONE' },
+  { id: 'assistant', label: 'AI Assistant', icon: Zap, badge: 'SMART' },
+  { id: 'device-control', label: 'Device Control', icon: Monitor },
+  { id: 'voice-commands', label: 'Voice Commands', icon: Mic },
+  { id: 'system-monitor', label: 'System Monitor', icon: Activity },
 ];
 
 const bottomItems = [
@@ -30,12 +36,12 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       {/* Logo */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-lg flex items-center justify-center">
-            <Sparkles className="w-6 h-6 text-white" />
+          <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-purple-600 rounded-lg flex items-center justify-center">
+            <Zap className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-900">ContentAI</h1>
-            <p className="text-sm text-gray-500">All-in-One AI Platform</p>
+            <h1 className="text-xl font-bold text-gray-900">SmartAssist</h1>
+            <p className="text-sm text-gray-500">Personal AI Assistant</p>
           </div>
         </div>
       </div>
@@ -44,7 +50,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       <div className="flex-1 py-6">
         <div className="px-3 mb-6">
           <h2 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-            AI Tools
+            Assistant
           </h2>
           <nav className="mt-3 space-y-1">
             {menuItems.map(({ id, label, icon: Icon, badge }) => (
@@ -101,11 +107,11 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       {/* Welcome Message */}
       <div className="p-4 border-t border-gray-200">
         <div className="text-center">
-          <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-full flex items-center justify-center mx-auto mb-2">
-            <Sparkles className="w-4 h-4 text-white" />
+          <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-2">
+            <Zap className="w-4 h-4 text-white" />
           </div>
-          <p className="text-sm font-medium text-gray-900">ContentAI Studio</p>
-          <p className="text-xs text-gray-500">All AI tools in one place</p>
+          <p className="text-sm font-medium text-gray-900">SmartAssist</p>
+          <p className="text-xs text-gray-500">Your intelligent companion</p>
         </div>
       </div>
     </div>
